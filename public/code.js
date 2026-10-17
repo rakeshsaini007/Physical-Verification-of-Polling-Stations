@@ -9,7 +9,7 @@
  * 2. Extensions (एक्सटेंशन) -> Apps Script पर क्लिक करें
  * 3. इस फाइल (code.js) के संपूर्ण कोड को Apps Script एडिटर (Code.gs) में पेस्ट करें
  * 4. ऊपर 'Save' (डिस्क आइकॉन) पर क्लिक करें
- * 5. पहली बार 'setupInitialSheets' फंक्शन चुनकर 'Run' करें (यह शीट, हेडर और Status कॉलम स्वतः बना देगा)
+ * 5. पहली बार 'setupInitialSheets' फंक्शन चुनकर 'Run' करें (यह शीट, हेडर, Remark और Status कॉलम स्वतः बना देगा)
  * 6. ऊपर दाईं ओर Deploy (तैनात करें) -> Manage deployments (यदि पहले से है) या New deployment पर क्लिक करें
  * 7. Select type -> Web app चुनें:
  *    - Execute as: Me (मेरी ईमेल आईडी)
@@ -178,6 +178,7 @@ function doPost(e) {
       payload.bloMobile || "",                        // बीएलओ मोबाइल
       payload.supervisorName || "",                   // सुपरवाइजर नाम
       payload.supervisorMobile || "",                 // सुपरवाइजर मोबाइल
+      payload.remark || "",                           // Remark (हिंदी या अंग्रेजी या दोनों में)
       nowStr                                          // अंतिम अपडेट दिनांक/समय
     ];
 
@@ -345,7 +346,13 @@ function getRowsAsObjects(sheet) {
       obj.bloMobile = row[20] || "";
       obj.supervisorName = row[21] || "";
       obj.supervisorMobile = row[22] || "";
-      obj.updatedAt = row[23] || "";
+      if (row.length >= 24) {
+        obj.remark = row[23] || "";
+        obj.updatedAt = row[24] || "";
+      } else {
+        obj.remark = "";
+        obj.updatedAt = row[23] || "";
+      }
     } else if (sheet.getName() === SHEET_NAME_MASTER_BOOTHS) {
       obj.boothNo = String(row[0] || "").trim();
       obj.boothName = row[1] || "";
@@ -381,7 +388,7 @@ function setupInitialSheets() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   ensureSheetsExist(ss);
   updateMasterBoothsStatus(ss);
-  SpreadsheetApp.getUi().alert("सत्यापन शीट, मास्टर बूथ डायरेक्टरी एवं ऑटो 'Status' (Complete/Pending) कॉलम सफलतापूर्वक तैयार कर दिए गए हैं!");
+  SpreadsheetApp.getUi().alert("सत्यापन शीट, मास्टर बूथ डायरेक्टरी, Remark कॉलम एवं ऑटो 'Status' (Complete/Pending) सफलतापूर्वक तैयार कर दिए गए हैं!");
 }
 
 function ensureSheetsExist(ss) {
@@ -413,11 +420,28 @@ function ensureSheetsExist(ss) {
       "बी०एल०ओ० मोबाइल",
       "सुपरवाइजर नाम",
       "सुपरवाइजर मोबाइल",
+      "Remark",
       "अंतिम अपडेट दिनांक"
     ];
     vSheet.getRange(1, 1, 1, vHeaders.length).setValues([vHeaders]);
     vSheet.getRange(1, 1, 1, vHeaders.length).setFontWeight("bold").setBackground("#e2e8f0");
     vSheet.setFrozenRows(1);
+  } else {
+    // If sheet exists, ensure "Remark" column is present before last column
+    var vCurHeaders = vSheet.getRange(1, 1, 1, Math.max(vSheet.getLastColumn(), 1)).getValues()[0];
+    var hasRemark = false;
+    for (var k = 0; k < vCurHeaders.length; k++) {
+      var hk = String(vCurHeaders[k]).toLowerCase().trim();
+      if (hk === "remark" || hk === "रिमार्क" || hk === "अभ्युक्ति") {
+        hasRemark = true;
+        break;
+      }
+    }
+    if (!hasRemark && vCurHeaders.length >= 2) {
+      var lastCol = vSheet.getLastColumn();
+      vSheet.insertColumnBefore(lastCol);
+      vSheet.getRange(1, lastCol).setValue("Remark").setFontWeight("bold").setBackground("#e2e8f0");
+    }
   }
 
   // 2. Master Booths Sheet

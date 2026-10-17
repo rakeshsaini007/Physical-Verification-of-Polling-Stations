@@ -178,6 +178,7 @@ function doPost(e) {
       payload.bloMobile || "",                        // बीएलओ मोबाइल
       payload.supervisorName || "",                   // सुपरवाइजर नाम
       payload.supervisorMobile || "",                 // सुपरवाइजर मोबाइल
+      payload.remark || "",                           // Remark (हिंदी या अंग्रेजी या दोनों में)
       nowStr                                          // अंतिम अपडेट दिनांक/समय
     ];
 
@@ -345,7 +346,21 @@ function getRowsAsObjects(sheet) {
       obj.bloMobile = row[20] || "";
       obj.supervisorName = row[21] || "";
       obj.supervisorMobile = row[22] || "";
-      obj.updatedAt = row[23] || "";
+      // Check headers dynamically for Remark and Updated Date
+      obj.remark = "";
+      obj.updatedAt = "";
+      for (var hIdx = 0; hIdx < headers.length; hIdx++) {
+        var hName = String(headers[hIdx]).trim().toLowerCase();
+        if (hName === "remark" || hName === "रिमार्क" || hName === "अभ्युक्ति") {
+          obj.remark = row[hIdx] || "";
+        }
+        if (hName.indexOf("अपडेट") !== -1 || hName.indexOf("updated") !== -1 || hName.indexOf("दिनांक") !== -1) {
+          obj.updatedAt = row[hIdx] || "";
+        }
+      }
+      if (!obj.updatedAt && row.length > 0) {
+        obj.updatedAt = row[row.length - 1] || "";
+      }
     } else if (sheet.getName() === SHEET_NAME_MASTER_BOOTHS) {
       obj.boothNo = String(row[0] || "").trim();
       obj.boothName = row[1] || "";
@@ -381,7 +396,7 @@ function setupInitialSheets() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   ensureSheetsExist(ss);
   updateMasterBoothsStatus(ss);
-  SpreadsheetApp.getUi().alert("सत्यापन शीट, मास्टर बूथ डायरेक्टरी एवं ऑटो 'Status' (Complete/Pending) कॉलम सफलतापूर्वक तैयार कर दिए गए हैं!");
+  SpreadsheetApp.getUi().alert("सत्यापन शीट, मास्टर बूथ डायरेक्टरी, Remark कॉलम एवं ऑटो 'Status' (Complete/Pending) सफलतापूर्वक तैयार कर दिए गए हैं!");
 }
 
 function ensureSheetsExist(ss) {
@@ -413,11 +428,28 @@ function ensureSheetsExist(ss) {
       "बी०एल०ओ० मोबाइल",
       "सुपरवाइजर नाम",
       "सुपरवाइजर मोबाइल",
+      "Remark",
       "अंतिम अपडेट दिनांक"
     ];
     vSheet.getRange(1, 1, 1, vHeaders.length).setValues([vHeaders]);
     vSheet.getRange(1, 1, 1, vHeaders.length).setFontWeight("bold").setBackground("#e2e8f0");
     vSheet.setFrozenRows(1);
+  } else {
+    // If sheet exists, ensure "Remark" column is present before last column
+    var vCurHeaders = vSheet.getRange(1, 1, 1, Math.max(vSheet.getLastColumn(), 1)).getValues()[0];
+    var hasRemark = false;
+    for (var k = 0; k < vCurHeaders.length; k++) {
+      var hk = String(vCurHeaders[k]).toLowerCase().trim();
+      if (hk === "remark" || hk === "रिमार्क" || hk === "अभ्युक्ति") {
+        hasRemark = true;
+        break;
+      }
+    }
+    if (!hasRemark && vCurHeaders.length >= 2) {
+      var lastCol = vSheet.getLastColumn();
+      vSheet.insertColumnBefore(lastCol);
+      vSheet.getRange(1, lastCol).setValue("Remark").setFontWeight("bold").setBackground("#e2e8f0");
+    }
   }
 
   // 2. Master Booths Sheet

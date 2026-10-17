@@ -43,6 +43,7 @@ export interface VerificationRecord {
   supervisorName?: string;
   supervisorDesignation?: string;
   supervisorMobile?: string;
+  remark?: string;
   updatedAt?: string;
 }
 

@@ -103,10 +103,16 @@ export const ExistingDataCard: React.FC<ExistingDataCardProps> = ({
             <span>·</span>
             <span className={record.electricityAvailable === 'हाँ' ? 'text-emerald-700 font-medium' : 'text-slate-400'}>विद्युत:{record.electricityAvailable}</span>
             <span>·</span>
-            <span className={record.rampAvailable === 'हाँ' ? 'text-emerald-700 font-medium' : 'text-slate-400'}>रैम्प:{record.rampAvailable}</span>
           </div>
         </div>
       </div>
+
+      {record.remark && (
+        <div className="bg-white/90 border border-amber-200/90 rounded-lg p-3 mb-3 text-xs">
+          <span className="font-bold text-amber-900 block mb-0.5">पूर्व में दर्ज अभ्युक्ति (Remark):</span>
+          <p className="text-slate-800 italic font-medium">{record.remark}</p>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 border-t border-amber-200/60 text-xs text-amber-900">
         <p className="flex items-center gap-1.5 font-medium">

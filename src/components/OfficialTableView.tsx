@@ -102,7 +102,8 @@ export const OfficialTableView: React.FC<OfficialTableViewProps> = ({
       'बी०एल०ओ० मो०',
       'सुपरवाइजर नाम',
       'सुपरवाइजर मो०',
-      'सत्यापन दिनांक'
+      'Remark',
+      'अंतिम अपडेट दिनांक'
     ];
 
     const rows = filteredRows.map((r, index) => {
@@ -129,6 +130,7 @@ export const OfficialTableView: React.FC<OfficialTableViewProps> = ({
         `"${r.master.bloMobile || ''}"`,
         `"${(r.master.supervisorName || '').replace(/"/g, '""')}"`,
         `"${r.master.supervisorMobile || ''}"`,
+        `"${(v?.remark || '').replace(/"/g, '""')}"`,
         `"${v?.updatedAt || 'लंबित'}"`
       ].join(',');
     });
@@ -286,6 +288,12 @@ export const OfficialTableView: React.FC<OfficialTableViewProps> = ({
                 <th rowSpan={2} className="border border-slate-800 px-1 py-2 w-20">
                   विकास खण्ड का नाम
                 </th>
+                <th rowSpan={2} className="border border-slate-800 px-2 py-2 min-w-[130px]">
+                  Remark (अभ्युक्ति)
+                </th>
+                <th rowSpan={2} className="border border-slate-800 px-1.5 py-2 w-24">
+                  अंतिम अपडेट दिनांक
+                </th>
                 <th rowSpan={2} className="border border-slate-800 px-2 py-2 w-16 print:hidden">
                   कार्यवाही
                 </th>
@@ -300,7 +308,7 @@ export const OfficialTableView: React.FC<OfficialTableViewProps> = ({
                 </th>
               </tr>
 
-              {/* Column Numbers Row: 1 to 16 */}
+              {/* Column Numbers Row: 1 to 16 + Remark + अंतिम अपडेट */}
               <tr className="bg-slate-200/80 font-bold text-slate-800 border-b border-slate-800 text-[10px]">
                 <td className="border border-slate-800 py-0.5">1</td>
                 <td className="border border-slate-800 py-0.5">2</td>
@@ -318,6 +326,8 @@ export const OfficialTableView: React.FC<OfficialTableViewProps> = ({
                 <td className="border border-slate-800 py-0.5">14</td>
                 <td className="border border-slate-800 py-0.5">15</td>
                 <td className="border border-slate-800 py-0.5">16</td>
+                <td className="border border-slate-800 py-0.5">Remark</td>
+                <td className="border border-slate-800 py-0.5">अपडेट दिनांक</td>
                 <td className="border border-slate-800 py-0.5 print:hidden">-</td>
               </tr>
             </thead>
@@ -432,6 +442,20 @@ export const OfficialTableView: React.FC<OfficialTableViewProps> = ({
                     {/* 16: Development Block Name */}
                     <td className="border border-slate-800 px-1 py-1.5 font-medium">
                       {v ? v.developmentBlock : '-'}
+                    </td>
+
+                    {/* Remark (Just before last column अंतिम अपडेट दिनांक) */}
+                    <td className="border border-slate-800 px-1.5 py-1.5 text-[10px] text-left max-w-[130px] break-words">
+                      {v?.remark ? (
+                        <span className="text-slate-800 font-medium">{v.remark}</span>
+                      ) : (
+                        <span className="text-slate-400 italic">-</span>
+                      )}
+                    </td>
+
+                    {/* अंतिम अपडेट दिनांक */}
+                    <td className="border border-slate-800 px-1 py-1.5 text-[9px] text-slate-600 font-mono">
+                      {v?.updatedAt ? v.updatedAt.split(' ')[0] : '-'}
                     </td>
 
                     {/* Action Column */}

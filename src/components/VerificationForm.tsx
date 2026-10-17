@@ -9,7 +9,8 @@ import {
   RefreshCw, 
   Check, 
   CheckCircle, 
-  AlertTriangle 
+  AlertTriangle,
+  Lock
 } from 'lucide-react';
 
 interface VerificationFormProps {
@@ -58,6 +59,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   const [roadCondition, setRoadCondition] = useState<string>('पक्का मार्ग');
   const [departmentName, setDepartmentName] = useState<string>(DEFAULT_DEPARTMENT_NAME);
   const [developmentBlock, setDevelopmentBlock] = useState<string>('स्वार');
+  const [remark, setRemark] = useState<string>('');
 
   // Handle Booth Number input change -> Auto-populate Booth Name & Check Existing Data
   useEffect(() => {
@@ -66,6 +68,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
       setBoothName('');
       setSelectedMasterBooth(null);
       setExistingRecord(null);
+      setRemark('');
       return;
     }
 
@@ -78,6 +81,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
       setBoothName('');
       setSelectedMasterBooth(null);
       setExistingRecord(null);
+      setRemark('');
       return;
     }
 
@@ -104,6 +108,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
         setRoadCondition('पक्का मार्ग');
         setDepartmentName(DEFAULT_DEPARTMENT_NAME);
         setDevelopmentBlock('स्वार');
+        setRemark('');
       }
     }
   }, [boothNoInput, existingRecords, availableMasterBooths]);
@@ -132,6 +137,8 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
     if (rec.developmentBlock) setDevelopmentBlock(rec.developmentBlock);
     if (rec.assemblyConstituency) setAssemblyConstituency(rec.assemblyConstituency);
     if (rec.tehsilName) setTehsilName(rec.tehsilName);
+    if (rec.remark !== undefined) setRemark(rec.remark);
+    else setRemark('');
   };
 
   const handleResetToExisting = () => {
@@ -181,6 +188,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
       supervisorName: selectedMasterBooth?.supervisorName || existingRecord?.supervisorName || '',
       supervisorDesignation: selectedMasterBooth?.supervisorDesignation || existingRecord?.supervisorDesignation || '',
       supervisorMobile: selectedMasterBooth?.supervisorMobile || existingRecord?.supervisorMobile || '',
+      remark: remark.trim(),
     };
 
     await onSaveRecord(newRecord);
@@ -208,26 +216,32 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
         {/* Assembly and Tehsil Bar */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              विधान सभा निर्वाचन क्षेत्र की संख्या व नाम :-
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+              <span>विधान सभा निर्वाचन क्षेत्र की संख्या व नाम :-</span>
+              <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+                <Lock className="w-3 h-3 text-slate-400" /> केवल पठनीय (Not Editable)
+              </span>
             </label>
             <input
               type="text"
               value={assemblyConstituency}
-              onChange={(e) => setAssemblyConstituency(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              readOnly
+              className="w-full px-3 py-2 text-sm font-semibold text-slate-700 bg-slate-100 border border-slate-300 rounded-lg cursor-not-allowed select-text focus:outline-none focus:ring-0"
               placeholder="34 - स्वार"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              तहसील का नाम :-
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+              <span>तहसील का नाम :-</span>
+              <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+                <Lock className="w-3 h-3 text-slate-400" /> केवल पठनीय (Not Editable)
+              </span>
             </label>
             <input
               type="text"
               value={tehsilName}
-              onChange={(e) => setTehsilName(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              readOnly
+              className="w-full px-3 py-2 text-sm font-semibold text-slate-700 bg-slate-100 border border-slate-300 rounded-lg cursor-not-allowed select-text focus:outline-none focus:ring-0"
               placeholder="स्वार"
             />
           </div>
@@ -315,9 +329,13 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
           <div className="md:col-span-8">
             <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
               <span>मतदेय स्थल का नाम (Booth Name - Auto Populated) *</span>
-              {selectedMasterBooth && (
+              {selectedMasterBooth ? (
                 <span className="text-[11px] text-emerald-700 font-medium flex items-center gap-1">
                   <Check className="w-3 h-3" /> मास्टर डायरेक्टरी से स्वतः प्राप्त
+                </span>
+              ) : (
+                <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+                  <Lock className="w-3 h-3" /> केवल पठनीय (Not Editable)
                 </span>
               )}
             </label>
@@ -325,14 +343,18 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
               <input
                 type="text"
                 value={boothName}
-                onChange={(e) => setBoothName(e.target.value)}
-                className="w-full px-3 py-2.5 text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
-                placeholder="मतदेय स्थल का नाम स्वतः आ जाएगा या टाइप करें..."
+                readOnly
+                className="w-full pl-3 pr-9 py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 border border-slate-300 rounded-lg cursor-not-allowed select-text focus:outline-none focus:ring-0 focus:border-slate-300"
+                placeholder="मतदेय स्थल का नाम (मास्टर सूची से स्वतः आएगा)"
                 required
               />
+              <div className="absolute right-3 top-3 text-slate-400 pointer-events-none">
+                <Lock className="w-4 h-4" />
+              </div>
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              जैसे ही आप बूथ संख्या बदलेंगे, मास्टर सूची से नाम स्वतः प्रविष्ट होगा।
+            <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+              <Lock className="w-3 h-3 text-slate-400 shrink-0 inline" />
+              <span>यह फील्ड संपादन योग्य नहीं है (Not Editable)। बूथ संख्या दर्ज करने पर नाम &quot;MasterBooths&quot; से स्वतः प्रविष्ट होता है।</span>
             </p>
           </div>
         </div>
@@ -686,6 +708,28 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
               </select>
             </div>
 
+          </div>
+
+          {/* New Column: Remark (just before last column "अंतिम अपडेट दिनांक") */}
+          <div className="p-4 bg-slate-50/70 rounded-xl border border-slate-200">
+            <div className="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+              <label className="block text-xs font-semibold text-slate-800">
+                Remark / अभ्युक्ति (अंतिम अपडेट दिनांक से ठीक पूर्व का कॉलम)
+              </label>
+              <span className="text-[10px] font-semibold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded border border-amber-200">
+                हिन्दी या अंग्रेजी या दोनों मान्य
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 mb-2">
+              इस कॉलम में आप भौतिक सत्यापन से संबंधित कोई भी विशिष्ट टिप्पणी या रिमार्क हिन्दी या अंग्रेजी अथवा दोनों भाषाओं में दर्ज कर सकते हैं।
+            </p>
+            <textarea
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              rows={2}
+              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium text-slate-900 placeholder:text-slate-400"
+              placeholder="उदा०: अतिरिक्त रंगाई-पुताई व मरम्मत की आवश्यकता / Building requires minor maintenance / रैम्प का निर्माण पूर्ण है..."
+            />
           </div>
 
         </div>
