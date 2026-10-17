@@ -1,0 +1,6 @@
+{
+  "name": "मतदेय स्थल भौतिक सत्यापन पोर्टल (Polling Station Verification)",
+  "description": "विधान सभा निर्वाचन क्षेत्र के मतदेय स्थलों (बूथों) के भौतिक सत्यापन हेतु आधिकारिक प्रारूप एवं गूगल ऐप स्क्रिप्ट डेटा प्रविष्टि प्रणाली",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
